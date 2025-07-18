@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 
+type DmcApprovalStatus = "Pending" | "Approved" | "Rejected";
+
 type AidRequest = {
   aid_id: number;
   date_time: string;
-  gn_division: string;
-  dmcApprove: string;
+  divisional_secretariat: string;
+  dmcApprove: DmcApprovalStatus;
 };
 
 export default function DMCDashboardHome() {
@@ -35,7 +37,6 @@ export default function DMCDashboardHome() {
   }, []);
 
   useEffect(() => {
-    
     if (dmcOfficer.district) {
       fetchAllAidRequests(dmcOfficer.district);
     }
@@ -43,13 +44,27 @@ export default function DMCDashboardHome() {
 
   const fetchAllAidRequests = async (district: string) => {
     try {
-      const res = await fetch(`http://localhost:5158/AidRequest/all-dmc?district=${encodeURIComponent(district)}`);
+      const res = await fetch(
+        `http://localhost:5158/AidRequest/all-dmc?district=${encodeURIComponent(
+          district
+        )}`
+      );
       if (!res.ok) throw new Error("Failed to fetch aid requests");
       const data = await res.json();
+      console.log("AidRequests from backend:", data); // Debug log
       setAidRequests(data);
     } catch (err) {
       console.error("Error fetching aid requests:", err);
     }
+  };
+
+  // Helper to display DMC Status properly and case-insensitive
+  const renderDmcStatus = (status: string) => {
+    if (!status) return "Pending";
+    const normalized = status.toLowerCase();
+    if (normalized === "approved") return "Approved";
+    if (normalized === "rejected") return "Rejected";
+    return "Pending";
   };
 
   return (
@@ -86,32 +101,33 @@ export default function DMCDashboardHome() {
               <tr className="bg-gray-200 text-gray-700">
                 <th className="py-2 px-4 border">Aid ID</th>
                 <th className="py-2 px-4 border">Date</th>
-                <th className="py-2 px-4 border">GN Division</th>
+                <th className="py-2 px-4 border">Divisional Secretariat</th>
                 <th className="py-2 px-4 border">DMC Status</th>
               </tr>
             </thead>
             <tbody>
               {aidRequests.length === 0 ? (
-  <tr>
-    <td colSpan={4} className="text-center py-4 text-red-500">
-      No aid requests available.
-    </td>
-  </tr>
-) : (
-  aidRequests.map((request) => (
-    <tr key={request.aid_id}>
-      <td className="py-2 px-4 border">{request.aid_id}</td>
-      <td className="py-2 px-4 border">
-        {new Date(request.date_time).toLocaleDateString()}
-      </td>
-      <td className="py-2 px-4 border">{request.gn_division}</td>
-      <td className="py-2 px-4 border">
-        {request.dmcApprove === "Approved" ? "Approved" : "Pending"}
-      </td>
-    </tr>
-  ))
-)}
-
+                <tr>
+                  <td colSpan={4} className="text-center py-4 text-red-500">
+                    No aid requests available.
+                  </td>
+                </tr>
+              ) : (
+                aidRequests.map((request) => (
+                  <tr key={request.aid_id}>
+                    <td className="py-2 px-4 border">{request.aid_id}</td>
+                    <td className="py-2 px-4 border">
+                      {new Date(request.date_time).toLocaleDateString()}
+                    </td>
+                    <td className="py-2 px-4 border">
+                      {request.divisional_secretariat}
+                    </td>
+                    <td className="py-2 px-4 border">
+                      {renderDmcStatus(request.dmcApprove)}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
