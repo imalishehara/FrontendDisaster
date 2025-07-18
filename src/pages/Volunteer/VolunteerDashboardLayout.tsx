@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 
@@ -10,7 +9,7 @@ export default function VolunteerDashboardLayout() {
   const [volunteer, setVolunteer] = useState({
     fullName: "",
     userId: "",
-    gnDivision: "",
+    divisionalSecretariat: "",
   });
 
   useEffect(() => {
@@ -20,9 +19,10 @@ export default function VolunteerDashboardLayout() {
       setVolunteer({
         fullName: parsed.fullName || parsed.name || "",
         userId: parsed.userId || "",
-        gnDivision: parsed.gnDivision || parsed.division || "",
+        divisionalSecretariat:
+          parsed.divisionalSecretariat || parsed.gnDivision || parsed.division || "",
       });
-      setAvailable(parsed.availability === "Available"); // Set based on availability
+      setAvailable(parsed.availability === "Available");
     } else {
       console.warn("Volunteer data not found in localStorage.");
     }
@@ -129,7 +129,9 @@ export default function VolunteerDashboardLayout() {
           </div>
           <div className="text-sm mb-1">User ID: {volunteer.userId}</div>
           <div className="text-sm mb-1">Name: {volunteer.fullName}</div>
-          <div className="text-sm mb-1">Division: {volunteer.gnDivision}</div>
+          <div className="text-sm mb-1">
+            Division: {volunteer.divisionalSecretariat}
+          </div>
         </div>
 
         <hr className="border-gray-200 mb-4" />
@@ -183,7 +185,9 @@ export default function VolunteerDashboardLayout() {
         <div className="w-full max-w-5xl mt-2">
           {/* Availability Toggle */}
           <div className="flex items-center justify-end mb-4">
-            <span className="mr-2 text-lg font-semibold text-gray-700">Availability</span>
+            <span className="mr-2 text-lg font-semibold text-gray-700">
+              Availability
+            </span>
             <label className="inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
