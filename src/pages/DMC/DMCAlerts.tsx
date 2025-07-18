@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 
 export default function DMCAlerts() {
@@ -40,7 +39,9 @@ export default function DMCAlerts() {
       {loading ? (
         <p className="text-center text-gray-600">Loading alerts...</p>
       ) : alerts.length === 0 ? (
-        <p className="text-center text-gray-600">No ongoing alerts in your district.</p>
+        <p className="text-center text-gray-600">
+          No ongoing alerts in your district.
+        </p>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white rounded-lg border">
@@ -49,7 +50,7 @@ export default function DMCAlerts() {
                 <th className="py-2 px-4 border">Alert Type</th>
                 <th className="py-2 px-4 border">Date</th>
                 <th className="py-2 px-4 border">District</th>
-                <th className="py-2 px-4 border">GN Division</th>
+                <th className="py-2 px-4 border">Divisional Secretariat</th>
                 <th className="py-2 px-4 border">Severity</th>
                 <th className="py-2 px-4 border">Status</th>
               </tr>
@@ -62,7 +63,9 @@ export default function DMCAlerts() {
                     {new Date(alert.date_time).toLocaleString()}
                   </td>
                   <td className="py-2 px-4 border">{alert.district}</td>
-                  <td className="py-2 px-4 border">{alert.gn_division}</td>
+                  <td className="py-2 px-4 border">
+                    {alert.divisional_secretariat}
+                  </td>
                   <td className="py-2 px-4 border">{alert.severity}</td>
                   <td className="py-2 px-4 border">{alert.status}</td>
                 </tr>
