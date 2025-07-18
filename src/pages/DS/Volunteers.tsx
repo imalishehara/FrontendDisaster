@@ -1,11 +1,10 @@
-
 import React, { useEffect, useState } from "react";
 
 interface Volunteer {
   user_id: number;
   name: string;
   district: string;
-  gn_division: string;
+  divisional_secretariat: string;
   availability: string;
   email: string;
   status: string;
@@ -18,34 +17,35 @@ export default function ViewVolunteers() {
 
   useEffect(() => {
     const fetchVolunteers = async () => {
-      const raw = localStorage.getItem("gnOfficerData");
+      const raw = localStorage.getItem("dsOfficerData");
       if (!raw) {
-        setError("GN Officer not logged in.");
+        setError("DS Officer not logged in.");
         setLoading(false);
         return;
       }
 
-      const gnOfficerData = JSON.parse(raw);
-      const gnDivision = gnOfficerData?.GnDivision || gnOfficerData?.gnDivision;
+      const dsOfficerData = JSON.parse(raw);
+      const divisionalSecretariat = dsOfficerData?.divisionalSecretariat;
 
-      if (!gnDivision) {
-        setError("GN Division missing.");
+      if (!divisionalSecretariat) {
+        setError("Divisional Secretariat missing.");
         setLoading(false);
         return;
       }
 
       try {
         const response = await fetch(
-          `http://localhost:5158/Volunteer/by-division?gnDivision=${encodeURIComponent(gnDivision)}`
+          `http://localhost:5158/Volunteer/by-division?divisionalSecretariat=${encodeURIComponent(
+            divisionalSecretariat
+          )}`
         );
 
         if (!response.ok) {
-          // Even if 404 is returned, treat it as valid empty result
+          // Treat 404 as empty
           if (response.status === 404) {
             setVolunteers([]);
             return;
           }
-
           const errorText = await response.text();
           throw new Error(errorText);
         }
@@ -72,7 +72,7 @@ export default function ViewVolunteers() {
         <p className="text-center text-red-500">{error}</p>
       ) : volunteers.length === 0 ? (
         <p className="text-center text-gray-600">
-          No volunteers found for your division.
+          No volunteers found for your Divisional Secretariat.
         </p>
       ) : (
         <table className="w-full border border-gray-300 text-left rounded-md overflow-hidden shadow-md">
