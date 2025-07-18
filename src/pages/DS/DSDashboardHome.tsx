@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 export default function DSDashboardHome() {
   const [dsOfficer, setDsOfficer] = useState({
     fullName: "",
-    dsDivision: "",
+    divisionalSecretariat: "",
   });
   const [currentDate, setCurrentDate] = useState("");
 
@@ -13,7 +13,7 @@ export default function DSDashboardHome() {
       const parsed = JSON.parse(storedData);
       setDsOfficer({
         fullName: parsed.fullName || "Unknown",
-        dsDivision: parsed.dsDivision || "Unknown",
+        divisionalSecretariat: parsed.divisionalSecretariat || "Unknown",
       });
     }
 
@@ -32,7 +32,7 @@ export default function DSDashboardHome() {
         Greetings <span className="text-gray-700">{dsOfficer.fullName}</span> !!
       </h1>
       <div className="text-lg md:text-2xl text-gray-700 mb-8 text-center">
-        {currentDate} &nbsp;|&nbsp; {dsOfficer.dsDivision}
+        {currentDate} &nbsp;|&nbsp; {dsOfficer.divisionalSecretariat}
       </div>
 
       <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
