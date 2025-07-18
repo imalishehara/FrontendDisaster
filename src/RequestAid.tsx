@@ -11,6 +11,9 @@ export default function RequestAid() {
     family_size: 1,
     date_time: "",
     description: "",
+    district: "",                 
+    divisional_secretariat: "",   
+    type_support: "",          
     latitude: null as number | null,      
     longitude: null as number | null   
   });
@@ -166,6 +169,9 @@ export default function RequestAid() {
       description: "",
       latitude: formData.latitude,    
       longitude: formData.longitude,
+      district: "",
+      divisional_secretariat: "",
+      type_support: "",
       
     });
     setErrors({ contact_no: "" });
@@ -212,7 +218,8 @@ export default function RequestAid() {
       }
 
       setShowSuccess(true);
-      setFormData({ full_name: "", contact_no: "", family_size: 1, date_time: "", description: "",latitude: null, longitude: null });
+      setFormData({ full_name: "", contact_no: "", family_size: 1, date_time: "", description: "",district: "",divisional_secretariat: "",
+        type_support: "",latitude: null, longitude: null });
       setSelectedDistrict("");
       setSelectedDivisionalSecretariat("");
       setIsLocationAutoDetected(false);
