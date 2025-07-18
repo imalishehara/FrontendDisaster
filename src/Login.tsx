@@ -8,64 +8,74 @@ export default function Login() {
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    const response = await fetch("http://localhost:5158/User/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: parseInt(userId),
-        password: password
-      })
-    });
+    try {
+      const response = await fetch("http://localhost:5158/User/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: parseInt(userId),
+          password: password,
+        }),
+      });
 
-    if (!response.ok) {
-      // If backend returns plain text for error:
-      const message = await response.text();
-      alert(message || "Login failed. Please check your credentials.");
-      return;
+      if (!response.ok) {
+        const message = await response.text();
+        alert(message || "Login failed. Please check your credentials.");
+        return;
+      }
+
+      const data = await response.json();
+      console.log("Login response:", data);
+
+      const selectedRole =
+        role === "DS Officer"
+          ? "DS"
+          : role === "DMC Officer"
+          ? "DMC"
+          : "Volunteer";
+
+      if (data.role.toLowerCase() !== selectedRole.toLowerCase()) {
+        alert("Role mismatch. Please select the correct role for this user.");
+        return;
+      }
+
+      // ✅ Trim divisionalSecretariat here!
+      const normalizedData = {
+        userId: data.userId,
+        role: data.role,
+        message: data.message,
+        divisionalSecretariat: (data.divisionalSecretariat || "").trim(),
+        fullName: data.fullName || data.FullName || data.name || "",
+        contactNo: data.contactNo || data.ContactNo || "",
+        district: data.district || data.District || "",
+      };
+
+      if (data.role.toLowerCase() === "ds") {
+        localStorage.setItem(
+          "dsOfficerData",
+          JSON.stringify(normalizedData)
+        );
+        navigate("/ds-dashboard");
+      } else if (data.role.toLowerCase() === "dmc") {
+        localStorage.setItem(
+          "dmcOfficerData",
+          JSON.stringify(normalizedData)
+        );
+        navigate("/dmc-dashboard");
+      } else if (data.role.toLowerCase() === "volunteer") {
+        localStorage.setItem(
+          "volunteerData",
+          JSON.stringify(normalizedData)
+        );
+        navigate("/volunteer-dashboard");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("An error occurred during login. Please try again.");
     }
-
-    const data = await response.json();
-    console.log("Login response:", data);
-
-    // ✅ CORRECT role compare logic:
-    const selectedRole = role === "DS Officer" ? "DS"
-      : role === "DMC Officer" ? "DMC"
-      : "Volunteer";
-
-    if (data.role.toLowerCase() !== selectedRole.toLowerCase()) {
-      alert("Role mismatch. Please select the correct role for this user.");
-      return;
-    }
-
-    const normalizedData = {
-      userId: data.userId,
-      role: data.role,
-      message: data.message,
-      divisionalSecretariat: data.divisionalSecretariat || null,
-      fullName: data.fullName || data.FullName || data.name || "",
-      contactNo: data.contactNo || data.ContactNo || "",
-      district: data.district || data.District || "",
-    };
-
-    if (data.role.toLowerCase() === "ds") {
-      localStorage.setItem("dsOfficerData", JSON.stringify(normalizedData));
-      navigate("/ds-dashboard");
-    } else if (data.role.toLowerCase() === "dmc") {
-      localStorage.setItem("dmcOfficerData", JSON.stringify(normalizedData));
-      navigate("/dmc-dashboard");
-    } else if (data.role.toLowerCase() === "volunteer") {
-      localStorage.setItem("volunteerData", JSON.stringify(normalizedData));
-      navigate("/volunteer-dashboard");
-    }
-
-  } catch (error) {
-    console.error("Login error:", error);
-    alert("An error occurred during login. Please try again.");
-  }
-};
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center pt-20">
@@ -76,7 +86,7 @@ export default function Login() {
             <label className="block text-lg font-medium mb-2">Role</label>
             <select
               value={role}
-              onChange={e => setRole(e.target.value)}
+              onChange={(e) => setRole(e.target.value)}
               className="w-full bg-gray-100 rounded-lg h-12 px-4 pr-10 text-lg border border-gray-300"
               required
             >
@@ -92,7 +102,7 @@ export default function Login() {
               type="number"
               required
               value={userId}
-              onChange={e => setUserId(e.target.value)}
+              onChange={(e) => setUserId(e.target.value)}
               placeholder="Enter your user ID"
               className="w-full bg-gray-100 rounded-lg h-12 px-4 text-lg border border-gray-300"
             />
@@ -104,7 +114,7 @@ export default function Login() {
               type="password"
               required
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
               className="w-full bg-gray-100 rounded-lg h-12 px-4 text-lg border border-gray-300"
             />
@@ -120,7 +130,10 @@ export default function Login() {
 
         <div className="mt-6 text-center">
           <span className="text-gray-600">Don't have an account?</span>
-          <Link to="/signup" className="ml-2 text-blue-600 font-semibold hover:underline">
+          <Link
+            to="/signup"
+            className="ml-2 text-blue-600 font-semibold hover:underline"
+          >
             Sign up as Volunteer
           </Link>
         </div>
