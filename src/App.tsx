@@ -5,6 +5,8 @@ import Home from "./pages/Home";
 import Alerts from "./pages/Alerts";
 import SubmitSymptoms from "./pages/SubmitSymptoms";
 import RequestAid from "./pages/RequestAid";
+import EmergencyAidRequest from "./pages/EmergencyAidRequests";
+import PostDisasterAidRequest from "./pages/PostDisasterAidRequest";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import VolunteerDashboardLayout from "./pages/volunteer/VolunteerDashboardLayout";
@@ -43,6 +45,8 @@ function AppContent() {
         <Route path="/alerts" element={<Alerts />} />
         <Route path="/submit-symptoms" element={<SubmitSymptoms />} />
         <Route path="/request-aid" element={<RequestAid />} />
+        <Route path="/emergency-aid-request" element={<EmergencyAidRequest />} />
+        <Route path="/post-disaster-aid-request" element={<PostDisasterAidRequest />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         {/* Volunteer dashboard routes */}
