@@ -6,34 +6,43 @@ export default function DMCReports() {
   const [showAlertModal, setShowAlertModal] = useState(false);
   const [alertForm, setAlertForm] = useState({
     district: "",
-    dsDivision: "",
+    divisionalSecretariat: "",
     alertType: "",
     severity: "Medium",
     latitude: 0,
     longitude: 0,
   });
 
-  // Load symptom reports approved by DS officer filtered by district of logged-in DMC officer
   useEffect(() => {
+    loadReports();
+  }, []);
+
+  const loadReports = () => {
     const storedDmcData = localStorage.getItem("dmcOfficerData");
+    console.log("Stored DMC Officer Data:", storedDmcData);
+
     if (storedDmcData) {
       const dmc = JSON.parse(storedDmcData);
-      const district = dmc.district;
+      const district = dmc.district?.trim();
+      console.log("Using district:", district);
 
       if (district) {
         fetch(`http://localhost:5158/Symptoms/approvedByDs/${district}`)
           .then((res) => res.json())
-          .then((data) => setReports(data))
+          .then((data) => {
+            console.log("Fetched reports:", data);
+            setReports(data);
+          })
           .catch((err) => console.error("Failed to fetch reports:", err));
       }
     }
-  }, []);
+  };
 
-  // When clicking "Create Alert" for a report, fill alert form with lat/lng from that report (and district info)
   const openAlertModal = (report: any) => {
+    setSelected(report);
     setAlertForm({
       district: report.district,
-      dsDivision: report.ds_division,
+      divisionalSecretariat: report.divisional_secretariat,
       alertType: "",
       severity: "Medium",
       latitude: report.latitude,
@@ -54,48 +63,70 @@ export default function DMCReports() {
   const handleAlertClear = () => {
     setAlertForm({
       district: "",
-      dsDivision: "",
+      divisionalSecretariat: "",
       alertType: "",
       severity: "Medium",
       latitude: 0,
       longitude: 0,
     });
+    setSelected(null);
   };
 
-  // ✅ UPDATED: Remove report when alert is published
   const handleAlertSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const alertData = {
       alert_type: alertForm.alertType,
       district: alertForm.district,
-      ds_division: alertForm.dsDivision,
+      divisional_secretariat: alertForm.divisionalSecretariat,
       severity: alertForm.severity,
       latitude: alertForm.latitude,
       longitude: alertForm.longitude,
     };
 
     try {
+      // 1) Create alert
       const response = await fetch("http://localhost:5158/Alerts/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(alertData),
       });
 
-      if (response.ok) {
-        alert("Alert published!");
+      if (!response.ok) {
+        alert("Failed to publish alert.");
+        return;
+      }
 
-        // ✅ Remove report from list
+      // 2) Update status
+      const statusResponse = await fetch(
+        "http://localhost:5158/Symptoms/updateStatus",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            reportId: selected?.report_id,
+            status: "AlertCreated",
+            actor: "DMC Officer",
+          }),
+        }
+      );
+
+      if (!statusResponse.ok) {
+        const text = await statusResponse.text();
+        console.error("Status update failed:", text);
+        alert("Alert created, but failed to update report status.");
+      } else {
+        alert("Alert published!");
+        // Optimistically remove from list immediately
         setReports((prev) =>
           prev.filter((r) => r.report_id !== selected?.report_id)
         );
-
-        setShowAlertModal(false);
-        setSelected(null);
-        handleAlertClear();
-      } else {
-        alert("Failed to publish alert.");
       }
+
+      setShowAlertModal(false);
+      handleAlertClear();
+      // Optional: reload fresh data to ensure clean state
+      loadReports();
     } catch (error) {
       console.error("Error submitting alert:", error);
       alert("An error occurred.");
@@ -112,7 +143,7 @@ export default function DMCReports() {
         <table className="min-w-full bg-white rounded-lg border">
           <thead>
             <tr className="bg-gray-200 text-gray-700">
-              <th className="py-2 px-4 border">DS Division</th>
+              <th className="py-2 px-4 border">Divisional Secretariat</th>
               <th className="py-2 px-4 border">Date and Time</th>
               <th className="py-2 px-4 border">District</th>
               <th className="py-2 px-4 border">Description</th>
@@ -121,8 +152,12 @@ export default function DMCReports() {
           <tbody>
             {reports.map((report, idx) => (
               <tr key={idx} className="border-b last:border-b-0">
-                <td className="py-2 px-4 border">{report.ds_division}</td>
-                <td className="py-2 px-4 border">{new Date(report.date_time).toLocaleString()}</td>
+                <td className="py-2 px-4 border">
+                  {report.divisional_secretariat}
+                </td>
+                <td className="py-2 px-4 border">
+                  {new Date(report.date_time).toLocaleString()}
+                </td>
                 <td className="py-2 px-4 border">{report.district}</td>
                 <td className="py-2 px-4 border">
                   <button
@@ -134,21 +169,31 @@ export default function DMCReports() {
                 </td>
               </tr>
             ))}
+            {reports.length === 0 && (
+              <tr>
+                <td colSpan={4} className="py-4 text-center text-gray-500">
+                  No reports found.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
+      {/* Detailed Report Modal */}
       {selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
           <div className="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full relative overflow-y-auto max-h-[90vh]">
-            <h3 className="text-2xl font-bold mb-4 text-center">Detailed Report</h3>
+            <h3 className="text-2xl font-bold mb-4 text-center">
+              Detailed Report
+            </h3>
             <div className="mb-2"><b>Report ID:</b> {selected.report_id}</div>
             <div className="mb-2"><b>Name:</b> {selected.reporter_name}</div>
             <div className="mb-2"><b>Contact No:</b> {selected.contact_no}</div>
             <div className="mb-2"><b>Description:</b> {selected.description}</div>
             <div className="mb-2"><b>Date / Time:</b> {new Date(selected.date_time).toLocaleString()}</div>
             <div className="mb-2"><b>District:</b> {selected.district}</div>
-            <div className="mb-2"><b>DS Division:</b> {selected.ds_division}</div>
+            <div className="mb-2"><b>Divisional Secretariat:</b> {selected.divisional_secretariat}</div>
             <div className="mb-2"><b>Latitude:</b> {selected.latitude}</div>
             <div className="mb-4"><b>Longitude:</b> {selected.longitude}</div>
 
@@ -187,13 +232,16 @@ export default function DMCReports() {
         </div>
       )}
 
+      {/* Create Alert Modal */}
       {showAlertModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
           <form
             className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full relative"
             onSubmit={handleAlertSubmit}
           >
-            <h3 className="text-2xl font-bold mb-6 text-center">Create New Alert</h3>
+            <h3 className="text-2xl font-bold mb-6 text-center">
+              Create New Alert
+            </h3>
 
             <div className="mb-4">
               <label className="block font-semibold mb-1">District</label>
@@ -207,11 +255,13 @@ export default function DMCReports() {
             </div>
 
             <div className="mb-4">
-              <label className="block font-semibold mb-1">DS Division</label>
+              <label className="block font-semibold mb-1">
+                Divisional Secretariat
+              </label>
               <input
                 type="text"
-                name="dsDivision"
-                value={alertForm.dsDivision}
+                name="divisionalSecretariat"
+                value={alertForm.divisionalSecretariat}
                 readOnly
                 className="w-full rounded px-3 py-2 border border-gray-300 bg-gray-100"
               />
@@ -242,7 +292,9 @@ export default function DMCReports() {
                     key={level}
                     type="button"
                     className={`px-4 py-2 rounded border ${
-                      alertForm.severity === level ? "bg-black text-white" : "bg-white text-black"
+                      alertForm.severity === level
+                        ? "bg-black text-white"
+                        : "bg-white text-black"
                     }`}
                     onClick={() => handleSeverity(level)}
                   >
@@ -287,7 +339,10 @@ export default function DMCReports() {
 
             <button
               className="absolute top-2 right-4 text-gray-500 hover:text-gray-700 text-2xl"
-              onClick={() => setShowAlertModal(false)}
+              onClick={() => {
+                setShowAlertModal(false);
+                handleAlertClear();
+              }}
               aria-label="Close"
               type="button"
             >
