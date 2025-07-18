@@ -1,10 +1,9 @@
-
 import React, { useEffect, useState } from "react";
 
 interface Volunteer {
   userId: number;
   name: string;
-  gn_division: string;
+  divisional_secretariat: string;
   district: string;
   email: string;
   availability: string; // "Available" | "Unavailable"
@@ -13,6 +12,13 @@ interface Volunteer {
 export default function DMCVolunteers() {
   const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // ✅ Helper to normalize availability safely
+  const normalizeAvailability = (value: any): "Available" | "Unavailable" => {
+    if (value === true || value === 1) return "Available";
+    if (typeof value === "string" && value.toLowerCase() === "available") return "Available";
+    return "Unavailable";
+  };
 
   useEffect(() => {
     const dmcData = JSON.parse(localStorage.getItem("dmcOfficerData") || "{}");
@@ -27,13 +33,9 @@ export default function DMCVolunteers() {
     fetch(`http://localhost:5158/Volunteer/by-district?district=${district}`)
       .then((res) => res.json())
       .then((data) => {
-        // Normalize availability value to string for display
         const volunteersWithAvailability = data.map((vol: any) => ({
           ...vol,
-          availability:
-            vol.availability === "Available" || vol.availability === 1
-              ? "Available"
-              : "Unavailable",
+          availability: normalizeAvailability(vol.availability),
         }));
         setVolunteers(volunteersWithAvailability);
         setLoading(false);
@@ -57,14 +59,16 @@ export default function DMCVolunteers() {
       {loading ? (
         <p className="text-center text-gray-600">Loading volunteers...</p>
       ) : volunteers.length === 0 ? (
-        <p className="text-center text-gray-600">No volunteers found in your district.</p>
+        <p className="text-center text-gray-600">
+          No volunteers found in your district.
+        </p>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white rounded-lg border">
             <thead>
               <tr className="bg-gray-200 text-gray-700">
                 <th className="py-2 px-4 border">Name</th>
-                <th className="py-2 px-4 border">GN Division</th>
+                <th className="py-2 px-4 border">Divisional Secretariat</th>
                 <th className="py-2 px-4 border">District</th>
                 <th className="py-2 px-4 border">Email</th>
                 <th className="py-2 px-4 border">Availability</th>
@@ -74,7 +78,7 @@ export default function DMCVolunteers() {
               {volunteers.map((vol) => (
                 <tr key={vol.userId} className="border-b last:border-b-0">
                   <td className="py-2 px-4 border">{vol.name}</td>
-                  <td className="py-2 px-4 border">{vol.gn_division}</td>
+                  <td className="py-2 px-4 border">{vol.divisional_secretariat}</td>
                   <td className="py-2 px-4 border">{vol.district}</td>
                   <td className="py-2 px-4 border">{vol.email || "N/A"}</td>
                   <td className="py-2 px-4 border">{vol.availability}</td>
