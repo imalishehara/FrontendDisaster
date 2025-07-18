@@ -37,16 +37,17 @@ export default function DMCAidRequests() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-        reportId: selected.aid_id,
-        status: status,
-        actor: "DMC"
-     }),
-
+          reportId: selected.aid_id,
+          status: status,
+          actor: "DMC",
+        }),
       });
 
       if (response.ok) {
         alert(`Request ${status} successfully`);
-        setAidRequests((prev) => prev.filter((r) => r.aid_id !== selected.aid_id));
+        setAidRequests((prev) =>
+          prev.filter((r) => r.aid_id !== selected.aid_id)
+        );
         setSelected(null);
       } else {
         alert("Failed to update status.");
@@ -70,7 +71,9 @@ export default function DMCAidRequests() {
       {loading ? (
         <p className="text-center text-gray-600">Loading aid requests...</p>
       ) : aidRequests.length === 0 ? (
-        <p className="text-center text-gray-600">No aid requests found in your district.</p>
+        <p className="text-center text-gray-600">
+          No aid requests found in your district.
+        </p>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white rounded-lg border">
@@ -79,7 +82,7 @@ export default function DMCAidRequests() {
                 <th className="py-2 px-4 border">Name</th>
                 <th className="py-2 px-4 border">Date</th>
                 <th className="py-2 px-4 border">Type</th>
-                <th className="py-2 px-4 border">GN Division</th>
+                <th className="py-2 px-4 border">Divisional Secretariat</th>
                 <th className="py-2 px-4 border">Action</th>
               </tr>
             </thead>
@@ -91,7 +94,7 @@ export default function DMCAidRequests() {
                     {new Date(req.date_time).toLocaleString()}
                   </td>
                   <td className="py-2 px-4 border">{req.type_support}</td>
-                  <td className="py-2 px-4 border">{req.gn_division}</td>
+                  <td className="py-2 px-4 border">{req.divisional_secretariat}</td>
                   <td className="py-2 px-4 border">
                     <button
                       className="underline text-blue-600"
@@ -123,16 +126,20 @@ export default function DMCAidRequests() {
               </div>
               <div className="text-sm mt-2 space-y-1">
                 <div>
-                  <span className="font-semibold">GN Division:</span> {selected.gn_division}
+                  <span className="font-semibold">Divisional Secretariat:</span>{" "}
+                  {selected.divisional_secretariat}
                 </div>
                 <div>
-                  <span className="font-semibold">Contact No:</span> {selected.contact_no}
+                  <span className="font-semibold">Contact No:</span>{" "}
+                  {selected.contact_no}
                 </div>
                 <div>
-                  <span className="font-semibold">Family Size:</span> {selected.family_size}
+                  <span className="font-semibold">Family Size:</span>{" "}
+                  {selected.family_size}
                 </div>
                 <div>
-                  <span className="font-semibold">Description:</span> {selected.description}
+                  <span className="font-semibold">Description:</span>{" "}
+                  {selected.description}
                 </div>
               </div>
               <div className="flex gap-3 mt-4 justify-end">
