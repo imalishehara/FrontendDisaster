@@ -119,7 +119,7 @@ export default function Home() {
   useEffect(() => {
     async function fetchAidRequests() {
       try {
-        const response = await fetch("http://localhost:5158/AidRequest/dmc-approved");
+        const response = await fetch("http://localhost:5158/AidRequest/ds-approved");
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         setAidRequests(data);
@@ -277,7 +277,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Map Section */}
+       {/* Map Section */}
       <section className="w-full mb-16 max-w-7xl mx-auto px-4">
         <h2 className="text-3xl md:text-4xl font-bold text-blue-900 mb-4">
           Live Disaster Map
