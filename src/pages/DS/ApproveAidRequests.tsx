@@ -37,10 +37,10 @@ export default function ApproveAidRequests() {
     }
 
     fetch(
-      `http://localhost:5158/AidRequest/pending?divisionalSecretariat=${encodeURIComponent(
-        divisionalSecretariat
-      )}`
-    )
+  `http://localhost:5158/AidRequest/pending-post-disaster?divisionalSecretariat=${encodeURIComponent(
+    divisionalSecretariat
+  )}`
+)
       .then((res) => res.json())
       .then((data) => {
         setRequests(data);
@@ -76,7 +76,7 @@ export default function ApproveAidRequests() {
 
       if (divisionalSecretariat) {
         const refreshed = await fetch(
-          `http://localhost:5158/AidRequest/pending?divisionalSecretariat=${encodeURIComponent(
+          `http://localhost:5158/AidRequest/pending-post-disaster?divisionalSecretariat=${encodeURIComponent(
             divisionalSecretariat
           )}`
         );
